@@ -1,0 +1,4 @@
+viser==1.1.1
+yourdfpy==0.0.60
+trimesh==5.2.1
+numpy
