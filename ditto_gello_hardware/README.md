@@ -23,6 +23,7 @@ so expect to tune clearances.
 | `urdf/ditto_leader_2xm_link5b.urdf`, `urdf/ditto_leader_3xm_link5b.urdf` | the same with link 5 option B |
 | `urdf/meshes/` | meshes the leader URDFs use (printed links, servos, base) |
 | `urdf/xarm7/` | the xArm7 model shown beside the leader |
+| `urdf/ditto_hands/` | the Ditto hand models: the follower (`ditto_follower_7dof`) and leader (`ditto_leader_7dof`) from [roamlab/ditto](https://github.com/roamlab/ditto/tree/reverse_teleop), and the newer leader models built from the SolidWorks export, `ditto_leader_2f` (index and thumb; the one the viewer puts on the leader arm) and `ditto_leader_3f` (adds the middle finger), drop-in replacements for `ditto_leader_7dof` (see `urdf/ditto_hands/README.md`) |
 | `stl/2xm/`, `stl/3xm/` | the printed parts, `link1.stl` to `link6.stl`, one full set per variant; link 5 comes as `link5a.stl` and `link5b.stl` |
 | `stl/FACTR_base.stl` | the printed base, FACTR's unchanged, the same for both variants |
 | `BUILD_2xm.md` | step-by-step build guide for the `2xm` variant, with pictures and the screw for every step |
@@ -47,15 +48,36 @@ Then open http://localhost:8080. Tested with Python 3.11.
 - **xArm7:** shows it beside the leader at full size, on top of the leader at half scale (the frames coincide), or
   hides it.
 - **Show:** turns joint frames, printed parts and servos on and off.
+- **Ditto hands:** "show the hands" puts the Ditto follower hand on the xArm7's flange (grey) and the Ditto leader
+  hand on the leader's flange (orange); `python view.py --hands` starts with them on. See below.
 
 `python view.py --port 8090` uses another port; `--variant 3xm` starts on the other variant; `--link5 b` starts with link 5 option B.
+
+### The Ditto hands
+
+The follower hand's model has its own mount: its root link, `hand_mount`, is the xArm7's flange (`link7`), and its
+fixed joint `hand_mount` → `palm` (xyz 0, 0, 10 mm; rpy 0, 90, 90°) holds the 10 mm connector and the hand's turn
+about the flange axis. The leader hand's model has no mount: its root link is `hand_piece`, and the viewer places it
+on the leader's `link7`.
+
+- **Rotation** (`LEADER_HAND_RPY` in `view.py`): rpy -90, 0, -90°. It makes the leader hand's finger axes parallel
+  to those of the follower hand on the xArm7, so both hands point the same way at equal arm joint angles.
+- **Offset** (`LEADER_MOUNTS`, the "leader hand mount" list): still an open choice. With xyz -6.3, -42.2, 78.6 mm the
+  leader hand sits on its flange exactly as the follower sits on the xArm7's (the index and first thumb joint axes
+  coincide), but the hand then touches link 6. 10 mm further out along the flange axis it clears link 6 by 5 mm.
+  The "half offset" entry is there for comparison: it would put the pinch point at half scale like the arm, but the
+  full-size hand ends up inside the wrist.
+- **shift x / y / z:** moves the leader hand from the chosen mount, in the flange frame. The text under the sliders
+  gives the resulting `link7` → `hand_piece` transform and where the pinch point (red ball) is from each flange.
+- **Fingers:** the same seven angles drive both hands. The teleop offsets between leader and follower fingers are
+  not applied.
 
 ## The two variants
 
 | Variant | XM430-W210 at | XC330-T288 at | Moving mass beyond the shoulder |
 |---|---|---|---|
 | `2xm` | J2, J4 | J1, J3, J5, J6, J7 | about 301 g |
-| `3xm` | J2, J3, J4 | J1, J5, J6, J7 | about 363 g |
+| `3xm` | J2, J3, J4 | J1, J5, J6, J7 | about 364 g |
 
 They differ only in `link2` and `link3`. `3xm` is the one to build for force feedback: its upper-arm roll joint (J3)
 has a metal horn and a stronger servo. Both need two XM430 idler sets (J2, J4) and one XC330 idler (J6), as FACTR

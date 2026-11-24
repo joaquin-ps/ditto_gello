@@ -42,9 +42,9 @@ from: every joint within 10 degrees (or 5). The parts of a joint still outside t
 red, deeper the further off. Then see that the render matches the arm (J1, J3, J5 and J7 have
 no stops, and after power-up the servos only know their angle within one turn) and that no
 cable is wrapped round a joint, and press "Confirm", then "Home": the servos take the arm
-exactly to the start pose and hold it, and the rest of the page appears. Throughout, J1, J3, J5 and J7 are
-kept within half a turn of the start pose by the joint-limit barrier, so the next run reads
-them on the right turn and the cables never wind.
+exactly to the start pose, gravity compensation takes over again, and the rest of the page
+appears. Throughout, J1, J3, J5 and J7 are kept within half a turn of the start pose by the
+joint-limit barrier, so the next run reads them on the right turn and the cables never wind.
 
 **raw_gello and gello.** raw_gello is the joints as the encoders give them; gello is the same
 pose in the xArm7's joints (``SHOULDER_FLIP`` in ``__init__.py``). The page and the log show
@@ -75,6 +75,7 @@ from ditto_gello_software.sag_test import LOG_DIR, SagTest, last_table, summary_
 from ditto_gello_software.torque_law import Gains, TorqueLaw
 from ditto_gello_software.trajectory import Player, Recorder, TrackingGains, Trajectory
 from ditto_gello_software.view import TEMPERATURE_BUTTON, servo_report, temperature_table
+from ditto_gello_software.ditto_hand import show_live
 from ditto_gello_software.viewer import Viewer
 
 POSE_HZ = 30.0
@@ -370,7 +371,7 @@ class GravityComp:
                     elif x >= 1.0 and lag.max() < HOME_DONE:
                         self.started = True
                         print("[gravity_comp] start check passed: the arm is at the start pose")
-                        self._hold(START_Q, "At the start pose, held there. **Release** to move the arm.")
+                        self._to_gravity("At the start pose: gravity compensation is back on.")
                 if self.mode == HOLD:  # the servos hold the pose; watch how far it is pushed
                     q_ref, off = self.hold_q, state.q - self.hold_q
                     self._hold_n += 1
@@ -710,7 +711,7 @@ def panel(viewer: Viewer, loop: GravityComp, stem: str) -> None:
             elif not page["confirmed"]:
                 steps = "**3.** Render matches the arm? No cable wrapped? Press **Confirm**."
             else:
-                steps = "**4.** Press **Home**: the servos move the arm the last few degrees and hold it."
+                steps = "**4.** Press **Home**: the servos move the arm the last few degrees."
             if loop.mode != HOME and "start pose" in loop.trajectory_message:  # how going there ended
                 steps += ("  \n" if steps else "") + loop.trajectory_message
             wound = full_turn & (np.degrees(off) > WOUND_WARN_DEG)
@@ -778,13 +779,20 @@ def main() -> None:
     src.add_argument("--u2d2", metavar="PORT", help="serial port of the real arm's U2D2, e.g. /dev/ttyUSB0")
     src.add_argument("--sim", action="store_true", help="a simulated arm instead of the real one")
     ap.add_argument("--rate", type=float, default=500.0, help="loop rate, Hz")
+    ap.add_argument("--hands", action="store_true",
+                    help="show the DITTO hands: the leader on the gello, the follower on the xArm7")
+    ap.add_argument("--hand-u2d2", metavar="PORT", default="/dev/ttyUSB1",
+                    help="with --hands: the DITTO leader hand's U2D2, read only (default /dev/ttyUSB1)")
     ap.add_argument("--gravity-gain", type=float, default=0.5,
                     help="share of the model's gravity torque applied when torque comes on")
     ap.add_argument("--joint-gain", type=float, nargs=7, default=None, metavar="F",
                     help="factor on the gravity gain per joint, J1 to J7 (default: 1 1 1 1 1.25 1.5 1)")
     ap.add_argument("--trajectory", metavar="FILE", help="a saved recording to have ready for playback")
-    ap.add_argument("--mass-g", type=float, default=30.0, help="mass fixed to the flange, g")
-    ap.add_argument("--mass-mm", type=float, default=10.0,
+    # The flange carries only the hand mount's latch base (ditto_j7_adapter: 4.2 cm3 of PLA,
+    # 5.2 g solid, plus four M2 screws), its centre 8 mm out along J7. The DITTO hand that clips
+    # onto it is held by the user, not compensated.
+    ap.add_argument("--mass-g", type=float, default=6.0, help="mass fixed to the flange, g")
+    ap.add_argument("--mass-mm", type=float, default=8.0,
                     help="its centre's distance beyond the flange, along joint 7's axis, mm")
     ap.add_argument("--limit-xm-mA", type=float, default=1000.0, help="current cap of the XM430 servos")
     ap.add_argument("--limit-xc-mA", type=float, default=500.0, help="current cap of the XC330 servos")
@@ -846,7 +854,9 @@ def main() -> None:
     stem = str(LOG_DIR / f"gravity_comp_{time.strftime('%Y%m%d_%H%M%S')}")
     log_path, sag_path = f"{stem}.npz", f"{stem}_sag.jsonl"
 
-    viewer = Viewer(args.port, panel="Ditto GELLO")
+    viewer = Viewer(args.port, panel="Ditto GELLO", hands=args.hands)
+    if args.hands:
+        show_live(viewer, args.hand_u2d2)
     panel(viewer, loop, stem)
     print(f"Viewer running at http://localhost:{args.port}  (Ctrl+C to stop; torque is off until "
           f"you press Gravity compensation ON in the page)\nLogging to {log_path}", flush=True)

@@ -16,14 +16,30 @@ import viser.transforms as vtf
 import yourdfpy
 from viser.extras import ViserUrdf
 
-from ditto_gello_software import (HORN_ZERO, NEAR_ZERO_POSE_DEG, START_RAW_RAD, XARM_URDF, gello_from_raw,
-                                  leader_urdf, raw_from_gello)
+from ditto_gello_software import (HORN_ZERO, NEAR_ZERO_POSE_DEG, START_RAW_RAD, URDF_DIR, XARM_URDF,
+                                  gello_from_raw, leader_urdf, raw_from_gello)
+from ditto_gello_software.ditto_hand import FINGERS, FOLLOWER_OFFSETS, HAND_HOME
 
 XARM_MODES = ("beside the leader, full size", "over the leader, half scale", "hidden")
 XARM_BESIDE = (0.0, 0.55, 0.0)  # where the full-size xArm7 stands, m
 DESIRED_COLOR, DESIRED_OPACITY = (70, 150, 255), 0.35  # the faded blue "desired" leader
 OFF_COLOR = np.array([230, 30, 30])  # what tint_joints turns a joint's parts towards
 PRINT_COLOR = (0.68, 0.69, 0.72)  # the printed links, grey (the URDF's blue hides tint_joints' red)
+# The DITTO hands (``hands``): the follower on the xArm7's flange, the leader on the gello's.
+HANDS_DIR = URDF_DIR / "ditto_hands"
+FOLLOWER_HAND = HANDS_DIR / "ditto_follower_7dof" / "ditto_follower_7dof.urdf"  # root hand_mount = the xArm7's link7
+LEADER_HAND = HANDS_DIR / "ditto_leader_2f" / "ditto_leader_2f.urdf"  # root hand_piece
+FOLLOWER_HAND_COLOR, LEADER_HAND_COLOR = (0.45, 0.46, 0.50), (0.95, 0.55, 0.15)
+# The hand mount (hardware leader/cad/ditto_mount.py): the latch base on servo 7's horn, the
+# bracket on the hand, both drawn in the hand's tcp frame (mm). The CAD puts the tcp frame on the
+# gello's link7 axes, MOUNT_TCP_Z out along z; the latch base is screwed on turned MOUNT_TURN_DEG
+# from that about J7 (the horn's four holes allow it). Then the leader hand's fingers are parallel
+# to the follower's on the xArm7 at equal joints, and at the start pose the hand slides into the
+# latch forwards (+x, away from the arm's base).
+MOUNT_DIR = URDF_DIR / "ditto_mount"
+MOUNT_PARTS = {"ditto_j7_adapter": (60, 95, 160), "ditto_hand_bracket": (70, 160, 120)}  # latch base, bracket
+MOUNT_TCP_Z = 0.021  # m (ditto_mount.py TCP_OFFSET)
+MOUNT_TURN_DEG = -90.0
 
 def _raw_deg(q_rad) -> list:
     """raw_gello degrees, each within -180 to 180 (the sliders' range)."""
@@ -59,6 +75,13 @@ The xArm7 is at the same joint angles. Joint frames are drawn on both
 """
 
 
+def _turn_z(deg: float) -> np.ndarray:
+    """A turn about z, 4 x 4."""
+    T = np.eye(4)
+    T[:3, :3] = vtf.SO3.from_z_radians(np.radians(deg)).as_matrix()
+    return T
+
+
 def _pose(T):
     return dict(wxyz=vtf.SO3.from_matrix(T[:3, :3]).wxyz, position=T[:3, 3])
 
@@ -77,6 +100,7 @@ class Viewer:
         pose_deg=POSES["ready"],
         xarm_mode: str = XARM_MODES[0],
         panel: str | None = None,
+        hands: bool = False,
     ) -> None:
         self.server = server = viser.ViserServer(port=port)
         server.scene.set_up_direction("+z")
@@ -155,9 +179,17 @@ class Viewer:
             self._cb_hw = gui.add_checkbox("servos, bearing, electronics", True)
             self._cb_pins = gui.add_checkbox("horn-hole pins (zero check)", True)
 
+        self._hand_md = hands_folder = None
+        if hands:
+            hands_folder = gui.add_folder("DITTO hands")
+            with hands_folder:
+                gui.add_markdown("Orange: the leader hand on the gello, on its mount (blue: latch base, "
+                                 "green: bracket). Grey: the follower on the xArm7.")
+                self._hand_md = gui.add_markdown("")
+
         # Everything but the caller's panel: what to show (show_controls), and what sets the pose
         # by hand (hide_pose_controls, for a caller that always sets it).
-        self._controls = [self._xarm_dd, show_folder]
+        self._controls = [self._xarm_dd, show_folder] + ([hands_folder] if hands else [])
         self._pose_controls = [notes, self._zero_btn, self._zero_md, joints_folder, poses_folder]
         for s in self._sliders:
             s.on_update(self._on_slider)
@@ -168,6 +200,7 @@ class Viewer:
         self._zero_btn.on_click(lambda _: self.set_pose_deg([0.0] * len(self._sliders)))
 
         self._load_leader()
+        self._hands = self._load_hands() if hands else None
         self._show()
         self.set_pose_deg(pose_deg)
 
@@ -181,6 +214,20 @@ class Viewer:
         if not on:
             self.show_on_sliders(self._q)
             self._on_slider()
+
+    def set_fingers(self, leader_q, status: str | None = None) -> None:
+        """Pose the DITTO hands (if shown): the leader's finger angles (rad, ``FINGERS`` order),
+        the follower at those plus the 7dof_f02 leader offsets. ``status`` goes under the mount
+        choice."""
+        if self._hands is None:
+            return
+        lq = np.asarray(leader_q, dtype=float)
+        for key, q in (("leader", lq), ("follower", lq + FOLLOWER_OFFSETS)):
+            model, names = self._hands[key]
+            angle = dict(zip(FINGERS, q))
+            model.update_cfg(np.array([angle[n] for n in names]))
+        if status is not None and status != self._hand_md.content:
+            self._hand_md.content = status
 
     def show_controls(self, on: bool) -> None:
         """Show or hide the viewer's display controls (xArm7 view, what to show)."""
@@ -235,6 +282,11 @@ class Viewer:
         for n, fr in zip(self.joint_names, self._xarm_frames):
             T = self._xarm.get_transform(self._xarm.joint_map[n].child, self._xarm.base_link)
             fr.wxyz, fr.position = vtf.SO3.from_matrix(T[:3, :3]).wxyz, T[:3, 3]
+        if self._hands is not None:
+            h = self._hands
+            for root, T in (("follower_root", self._xarm.get_transform("link7", self._xarm.base_link)),
+                            ("leader_root", u.get_transform("link7", u.base_link) @ h["mount"])):
+                h[root].wxyz, h[root].position = vtf.SO3.from_matrix(T[:3, :3]).wxyz, T[:3, 3]
         self._zero_check()
 
     def _zero_check(self) -> None:
@@ -324,6 +376,30 @@ class Viewer:
                 seg = np.stack([p0, p0 + length * np.array(axis, dtype=np.float32)])[None]
                 st["pins"].append(server.scene.add_line_segments(
                     f"/leader/{link}/J{m['joint']}_{key}", seg, color, line_width=width))
+
+    def _load_hands(self) -> dict:
+        """The two DITTO hand models, the leader's place on the gello's link7, and its mount."""
+        server = self.server
+        h = {"follower_root": server.scene.add_frame("/xarm7/hand", show_axes=False),  # = the xArm7's link7
+             "leader_root": server.scene.add_frame("/leader_hand", show_axes=False)}  # = hand_piece
+        for key, path, root, color in (("follower", FOLLOWER_HAND, "/xarm7/hand/urdf", FOLLOWER_HAND_COLOR),
+                                       ("leader", LEADER_HAND, "/leader_hand/urdf", LEADER_HAND_COLOR)):
+            u = yourdfpy.URDF.load(str(path))
+            h[key] = (ViserUrdf(server, u, root_node_name=root, mesh_color_override=color), list(u.actuated_joint_names))
+            if key == "leader":
+                tcp = np.eye(4)  # link7 -> the hand's tcp frame
+                tcp[2, 3] = MOUNT_TCP_Z
+                hp_tcp = u.get_transform("tcp", "hand_piece")  # the tcp frame in hand_piece's
+                h["mount"] = _turn_z(MOUNT_TURN_DEG) @ tcp @ np.linalg.inv(hp_tcp)  # link7 -> hand_piece
+                for name, color in MOUNT_PARTS.items():  # the mount's parts, in the tcp frame
+                    path = MOUNT_DIR / f"{name}.stl"
+                    if path.exists():
+                        m = trimesh.load(path)
+                        server.scene.add_mesh_simple(f"/leader_hand/{name}", m.vertices / 1000.0, m.faces,
+                                                     color=color, flat_shading=True, **_pose(hp_tcp))
+        self._hands = h
+        self.set_fingers(HAND_HOME)
+        return h
 
     def _load_desired(self, path) -> None:
         """A see-through blue copy of the leader, hidden until :meth:`set_desired` poses it."""

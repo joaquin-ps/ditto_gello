@@ -28,6 +28,7 @@ from ditto_gello_software.chain import (
     LeaderChain,
     latency_timer_ms,
 )
+from ditto_gello_software.ditto_hand import show_live
 from ditto_gello_software.viewer import Viewer
 
 POSE_HZ = 30.0  # how often the arms on the screen are moved
@@ -96,6 +97,10 @@ def main() -> None:
     src.add_argument("--u2d2", metavar="PORT", help="serial port of the real arm's U2D2, e.g. /dev/ttyUSB0")
     src.add_argument("--fake", action="store_true", help="a pretend arm moving through the poses")
     ap.add_argument("--rate", type=float, default=100.0, help="how often the servos are read, Hz")
+    ap.add_argument("--hands", action="store_true",
+                    help="show the DITTO hands: the leader on the gello, the follower on the xArm7")
+    ap.add_argument("--hand-u2d2", metavar="PORT", default="/dev/ttyUSB1",
+                    help="with --hands: the DITTO leader hand's U2D2, read only (default /dev/ttyUSB1)")
     args = ap.parse_args()
 
     chain = None
@@ -116,7 +121,9 @@ def main() -> None:
             print(f"Note: the latency timer of {chain.port} is {latency} ms; "
                   "`dynamixel-port --latency-timer 1` sets it to 1 ms for faster reads.")
 
-    viewer = Viewer(args.port, panel="Real arm" if chain else None)
+    viewer = Viewer(args.port, panel="Real arm" if chain else None, hands=args.hands)
+    if args.hands:
+        show_live(viewer, args.hand_u2d2)
     print(f"Viewer running at http://localhost:{args.port}  (Ctrl+C to stop)")
     if chain is None:
         while True:

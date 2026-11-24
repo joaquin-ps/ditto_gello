@@ -10,6 +10,7 @@ python -m ditto_gello_software.gravity_comp --u2d2 /dev/ttyUSB0   # the arm, htt
 python -m ditto_gello_software.gravity_comp --sim                 # a simulated arm
 python -m ditto_gello_software.view --u2d2 /dev/ttyUSB0           # read only: watch the arm
 python -m ditto_gello_software.bus_check --u2d2 /dev/ttyUSB0      # read only: servo bus health
+python -m ditto_gello_software.view --u2d2 /dev/ttyUSB0 --hands   # ... with the DITTO hands, see below
 ```
 
 Run them from this folder, one at a time: only one program can use the U2D2.
@@ -39,10 +40,25 @@ cat /sys/bus/usb-serial/devices/ttyUSB0/latency_timer   # 1
    or 5°).
 3. Check that the render matches the arm and no cable is wrapped round a joint, then press
    **Confirm**.
-4. Press **Home**: the servos take the arm exactly to the start pose and hold it, and the rest
-   of the page appears.
+4. Press **Home**: the servos take the arm exactly to the start pose, gravity compensation takes
+   over again, and the rest of the page appears.
 
 The start pose is the xArm7's reset pose in mini_manipulation_env (`START_POSE_DEG`).
+
+## The DITTO hands
+
+`--hands` (on `view` and `gravity_comp`) shows the DITTO leader hand (`ditto_leader_2f`, orange)
+on the gello's flange and the follower hand (`ditto_follower_7dof`, grey) on the xArm7's. The
+finger angles come live from the leader hand's own U2D2 (`--hand-u2d2`, default `/dev/ttyUSB1`),
+read only, converted as roamlab/ditto does for the 7dof_f02 hand config. The follower is shown
+at the same angles plus 7dof_f02's leader offsets (index 2 +15°, index 3 +5°).
+
+The leader hand sits on its mount (`ditto_gello_hardware/urdf/ditto_mount`, from the hardware
+repo's `leader/cad/ditto_mount.py`): the latch base (blue) on servo 7's horn and the bracket
+(green) on the hand. The latch base is screwed on turned −90° about J7 from the CAD's placement
+(the horn's four holes allow it). That is the one way the leader's finger axes are parallel to
+the follower's on the xArm7 at equal joints, and at the start pose the hand then slides into
+the latch forwards (+x, away from the arm's base).
 
 ## raw_gello and gello
 
