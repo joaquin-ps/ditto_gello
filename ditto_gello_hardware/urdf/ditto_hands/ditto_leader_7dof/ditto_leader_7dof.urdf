@@ -1,0 +1,313 @@
+<?xml version="1.0"?>
+<!-- Cleaned from the SolidWorks export fingertip_tracking_urdf_leader_v1.urdf: re-rooted at hand_piece (same joint values give the same pose), relative mesh paths, decimated meshes, marker spheres as primitives. Joint limits are the follower limits of hand_config/7dof_f02 (leader angles map 1:1 to the follower). -->
+<robot name="ditto_leader_7dof">
+  <link name="thumb_sphere">
+    <inertial>
+      <origin xyz="-2.844e-07 -0.01781916505 0.1758409884" rpy="0 0 0" />
+      <mass value="5.23598775598299E-07" />
+      <inertia ixx="5.23598775598299E-14" ixy="4.05800245658716E-30" ixz="-4.82056920754523E-30" iyy="5.23598775598299E-14" iyz="5.03864245159366E-30" izz="5.23598775598299E-14" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.000499651" />
+      </geometry>
+      <material name="marker">
+        <color rgba="0.9 0.3 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.000499651" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb_fingertip">
+    <inertial>
+      <origin xyz="-0.0005143214167 -0.02128382673 0.003585513538" rpy="0 0 0" />
+      <mass value="0.00663294273043832" />
+      <inertia ixx="6.81038273411615E-07" ixy="1.99491502315781E-07" ixz="-4.27390127077952E-08" iyy="6.40566772977354E-07" iyz="2.3904592821882E-08" izz="9.0551022357068E-07" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/thumb_fingertip.stl" />
+      </geometry>
+      <material name="body">
+        <color rgba="0.75 0.75 0.75 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/thumb_fingertip.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb3_to_thumb4">
+    <inertial>
+      <origin xyz="-0.01776633077 -0.02111836154 0.01139892159" rpy="0 0 0" />
+      <mass value="0.0234653618640663" />
+      <inertia ixx="2.60295355985613E-06" ixy="2.18112328344641E-07" ixz="-1.09486346370975E-08" iyy="2.65968309678345E-06" iyz="-2.82281015779381E-07" izz="1.71402705743677E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.02074831665 -0.02731054717 0.006974336497" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/thumb3_to_thumb4.stl" />
+      </geometry>
+      <material name="body">
+        <color rgba="0.75 0.75 0.75 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.02074831665 -0.02731054717 0.006974336497" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/thumb3_to_thumb4.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb2_to_thumb3">
+    <inertial>
+      <origin xyz="-0.04638806432 0.01070221474 -0.01534306747" rpy="0 0 0" />
+      <mass value="0.0375905426209132" />
+      <inertia ixx="7.23727159604798E-06" ixy="-1.25445448845836E-06" ixz="-2.98132707650357E-06" iyy="1.02870773464202E-05" iyz="-2.04216917875208E-06" izz="7.64447290565789E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.05901525257 0.002996568795 -0.02312614013" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/thumb2_to_thumb3.stl" />
+      </geometry>
+      <material name="body">
+        <color rgba="0.75 0.75 0.75 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.05901525257 0.002996568795 -0.02312614013" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/thumb2_to_thumb3.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="thumb1_to_thumb2">
+    <inertial>
+      <origin xyz="-0.01980624617 0.008193245618 0.03162549756" rpy="0 0 1.570796327" />
+      <mass value="0.0359943102214213" />
+      <inertia ixx="3.75951522831487E-06" ixy="-1.03126454555417E-06" ixz="3.11220612264443E-06" iyy="1.90322373297762E-05" iyz="-1.36446011369964E-07" izz="1.86999982186672E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="-0.01532050865 -0.008703740045 0.01784838041" rpy="0 0 1.570796327" />
+      <geometry>
+        <mesh filename="meshes/thumb1_to_thumb2.stl" />
+      </geometry>
+      <material name="body">
+        <color rgba="0.75 0.75 0.75 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="-0.01532050865 -0.008703740045 0.01784838041" rpy="0 0 1.570796327" />
+      <geometry>
+        <mesh filename="meshes/thumb1_to_thumb2.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="hand_piece">
+    <inertial>
+      <origin xyz="0.002166575708 0.05067867365 -0.02670771025" rpy="0 0 0" />
+      <mass value="0.104043539352612" />
+      <inertia ixx="4.08609409243529E-05" ixy="5.29300374284557E-06" ixz="7.54033889086746E-07" iyy="5.99007672383681E-05" iyz="-2.48156326780814E-06" izz="3.9017668443744E-05" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/hand_piece.stl" />
+      </geometry>
+      <material name="body">
+        <color rgba="0.75 0.75 0.75 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/hand_piece.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index1_to_index2">
+    <inertial>
+      <origin xyz="-0.003459505881 0.02707438953 -3.069031543e-06" rpy="0 0 0" />
+      <mass value="0.0233725761085749" />
+      <inertia ixx="1.36213921192831E-06" ixy="1.74608988290047E-07" ixz="1.37828116713699E-09" iyy="2.95493236889138E-06" iyz="8.41761825157323E-11" izz="2.90002852518248E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/index1_to_index2.stl" />
+      </geometry>
+      <material name="body">
+        <color rgba="0.75 0.75 0.75 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/index1_to_index2.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index2_to_index3">
+    <inertial>
+      <origin xyz="0.005551244592 0.01742497839 -0.03251164027" rpy="0 0 0" />
+      <mass value="0.0276474233312734" />
+      <inertia ixx="2.011378093149E-06" ixy="2.65859521689334E-09" ixz="5.00764905506088E-08" iyy="2.75213745572502E-06" iyz="8.38424408705795E-11" izz="3.43958611696569E-06" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/index2_to_index3.stl" />
+      </geometry>
+      <material name="body">
+        <color rgba="0.75 0.75 0.75 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/index2_to_index3.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index_fingertip">
+    <inertial>
+      <origin xyz="-0.002038587809 0.006227480472 -0.01540293084" rpy="0 0 0" />
+      <mass value="0.00673947097021502" />
+      <inertia ixx="1.02623828734203E-06" ixy="-3.08234239347777E-08" ixz="-3.2035993677945E-08" iyy="6.04001728012509E-07" iyz="-4.95796227697548E-08" izz="7.46024743434737E-07" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/index_fingertip.stl" />
+      </geometry>
+      <material name="body">
+        <color rgba="0.75 0.75 0.75 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="meshes/index_fingertip.stl" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="index_sphere">
+    <inertial>
+      <origin xyz="5.126348697e-07 0 0" rpy="0 0 0" />
+      <mass value="5.23598775598299E-07" />
+      <inertia ixx="5.23598775598299E-14" ixy="-1.38777878078145E-30" ixz="-2.06794988360024E-38" iyy="5.23598775598299E-14" iyz="9.40395480055977E-38" izz="5.23598775598299E-14" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0005" />
+      </geometry>
+      <material name="marker">
+        <color rgba="0.9 0.3 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0005" />
+      </geometry>
+    </collision>
+  </link>
+  <link name="trakstar_sphere">
+    <inertial>
+      <origin xyz="5.126348697e-07 0 0" rpy="0 0 0" />
+      <mass value="5.23598775598299E-07" />
+      <inertia ixx="5.23598775598299E-14" ixy="-1.34756934696506E-30" ixz="-3.23119962436386E-45" iyy="5.23598775598299E-14" iyz="7.17464813734306E-43" izz="5.23598775598299E-14" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0005" />
+      </geometry>
+      <material name="marker">
+        <color rgba="0.9 0.3 0.2 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0005" />
+      </geometry>
+    </collision>
+  </link>
+  <joint name="thumb1" type="revolute">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="hand_piece" />
+    <child link="thumb1_to_thumb2" />
+    <axis xyz="0.1664166548 -0.9668080866 -0.1938752707" />
+    <limit lower="-0.436332" upper="0.523599" effort="10" velocity="4.8" />
+  </joint>
+  <joint name="index1" type="revolute">
+    <origin xyz="-0.01214814623 0.03811247766 -0.06877882933" rpy="0 0 1.570796327" />
+    <parent link="hand_piece" />
+    <child link="index1_to_index2" />
+    <axis xyz="-1 0 0" />
+    <limit lower="-0.226893" upper="0.418879" effort="10" velocity="4.8" />
+  </joint>
+  <joint name="trakstar_sphere_joint" type="fixed">
+    <origin xyz="-0.04214865886 0.04101247766 0.006221170675" rpy="-1.570796327 0 0" />
+    <parent link="hand_piece" />
+    <child link="trakstar_sphere" />
+    <axis xyz="0 0 0" />
+  </joint>
+  <joint name="thumb2" type="revolute">
+    <origin xyz="-0.01532050865 -0.008703740045 0.01784838041" rpy="0 0 1.570796327" />
+    <parent link="thumb1_to_thumb2" />
+    <child link="thumb2_to_thumb3" />
+    <axis xyz="-0.2555036665 0.6297090364 0.7336105274" />
+    <limit lower="-1.570796" upper="-0.349066" effort="10" velocity="4.8" />
+  </joint>
+  <joint name="index2" type="revolute">
+    <origin xyz="-0.0205 0.0127 0" rpy="0 0 0" />
+    <parent link="index1_to_index2" />
+    <child link="index2_to_index3" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.174533" upper="1.570796" effort="10" velocity="4.8" />
+  </joint>
+  <joint name="thumb3" type="revolute">
+    <origin xyz="-0.05901525257 0.002996568795 -0.02312614013" rpy="0 0 0" />
+    <parent link="thumb2_to_thumb3" />
+    <child link="thumb3_to_thumb4" />
+    <axis xyz="-0.803818247 0.5580696777 -0.2059962635" />
+    <limit lower="-1.570796" upper="0.174533" effort="10" velocity="4.8" />
+  </joint>
+  <joint name="index3" type="revolute">
+    <origin xyz="0 0 -0.041" rpy="0 0 0" />
+    <parent link="index2_to_index3" />
+    <child link="index_fingertip" />
+    <axis xyz="0 1 0" />
+    <limit lower="-0.174533" upper="1.570796" effort="10" velocity="4.8" />
+  </joint>
+  <joint name="thumb4" type="revolute">
+    <origin xyz="-0.02074831665 -0.02731054717 0.006974336497" rpy="0 0 0" />
+    <parent link="thumb3_to_thumb4" />
+    <child link="thumb_fingertip" />
+    <axis xyz="-0.803818247 0.5580696777 -0.2059962635" />
+    <limit lower="-1.570796" upper="0.174533" effort="10" velocity="4.8" />
+  </joint>
+  <joint name="index_sphere_joint" type="fixed">
+    <origin xyz="-0.007 -0.0105 -0.03219948737" rpy="3.141592639 1.570796327 0" />
+    <parent link="index_fingertip" />
+    <child link="index_sphere" />
+    <axis xyz="0 0 0" />
+  </joint>
+  <joint name="thumb_sphere_joint" type="fixed">
+    <origin xyz="0.0056538692 -0.0456884615 0.00853535992" rpy="-1.570796327 0 0" />
+    <parent link="thumb_fingertip" />
+    <child link="thumb_sphere" />
+    <axis xyz="0 0 0" />
+  </joint>
+</robot>

@@ -1,0 +1,21 @@
+# conda env create -f environment.yml && conda activate ditto_gello
+# (or, into an existing ditto_gello: conda env update -n ditto_gello -f environment.yml)
+#
+# The software's share of the one ditto_gello environment. ditto_gello_development's
+# environment.yml lists the same packages plus the CAD and stress-analysis tools.
+name: ditto_gello
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pip:
+      # The viewer: the same four lines as ditto_gello_hardware/requirements.txt.
+      - viser==1.1.1
+      - yourdfpy==0.0.60
+      - trimesh==5.2.1
+      - numpy
+      # The real arm: our Dynamixel library (it brings in dynamixel-sdk).
+      - dynamixel-u2d2 @ git+https://github.com/joaquin-ps/dynamixel_u2d2.git@ca206381c7607a815c9d2a615e336fa5064a3f53
+      # Gravity compensation: rigid-body dynamics of the leader's URDF (pinocchio).
+      - pin==4.1.0
